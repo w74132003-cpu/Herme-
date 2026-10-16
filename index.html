@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>教師研習素材：對話式 AI、教學常見 Agent 與 Hermes Agent 比較</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-paper: #F7F4EF;
+      --bg-card: #FFFFFF;
+      --bg-subtle: #EFECE6;
+      --ink-main: #18181B;
+      --ink-muted: #52525B;
+      --border-ink: #18181B;
+      --border-subtle: #D6D3CD;
+      --accent-vermilion: #D94E34;
+      --accent-forest: #1B4D3E;
+      --accent-amber: #C87D20;
+      --accent-cobalt: #234E94;
+    }
+
+    body {
+      font-family: 'Inter', 'Noto Sans TC', sans-serif;
+      background-color: var(--bg-paper);
+      color: var(--ink-main);
+      overflow-x: hidden;
+      background-image: radial-gradient(#D6D3CD 0.75px, transparent 0.75px);
+      background-size: 20px 20px;
+    }
+
+    .serif-title {
+      font-family: 'Noto Serif TC', Georgia, serif;
+    }
+
+    .mono-font {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .editorial-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border-ink);
+      box-shadow: 4px 4px 0px var(--border-ink);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+    }
+
+    .editorial-btn {
+      border: 1.5px solid var(--border-ink);
+      box-shadow: 2px 2px 0px var(--border-ink);
+      transition: all 0.15s ease;
+    }
+
+    .editorial-btn:hover {
+      transform: translate(-1px, -1px);
+      box-shadow: 3px 3px 0px var(--border-ink);
+    }
+
+    .editorial-btn:active {
+      transform: translate(1px, 1px);
+      box-shadow: 0px 0px 0px var(--border-ink);
+    }
+
+    .editorial-tag {
+      border: 1px solid var(--border-ink);
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .step-node {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #EFECE6;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #A1A1AA;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+
+  <!-- Top Masthead & Mode Bar -->
+  <header class="sticky top-0 z-40 bg-[#F7F4EF]/95 backdrop-blur border-b-2 border-zinc-900">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <span class="bg-[#D94E34] text-white mono-font text-xs font-bold px-2.5 py-1 border border-zinc-900 uppercase tracking-wider">教師研習講義</span>
+        <h1 class="font-bold text-base sm:text-lg tracking-tight text-zinc-900">從對話式 AI 到 AI Agent：教學常見工具與 Hermes Agent</h1>
+      </div>
+
+      <!-- Navigation & View Mode Controls -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <div class="inline-flex rounded-none border border-zinc-900 bg-white p-0.5" role="group">
+          <button id="navSlide1" type="button" class="px-3 py-1 text-xs sm:text-sm font-bold transition-colors bg-zinc-900 text-white">01｜對話 vs 代理</button>
+          <button id="navSlide2" type="button" class="px-3 py-1 text-xs sm:text-sm font-bold transition-colors text-zinc-700 hover:bg-zinc-100">02｜四類 Agent 比較</button>
+          <button id="navSlide3" type="button" class="px-3 py-1 text-xs sm:text-sm font-bold transition-colors text-zinc-700 hover:bg-zinc-100">03｜Hermes 四項設計</button>
+        </div>
+
+        <button id="toggleViewModeBtn" type="button" class="editorial-btn bg-[#EFECE6] hover:bg-amber-100 text-zinc-900 px-3 py-1 text-xs sm:text-sm font-bold flex items-center gap-1.5">
+          <span id="viewModeIcon">01-03</span>
+          <span id="viewModeLabel">切換為：單張簡報翻頁模式</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 flex-1 space-y-8">
+
+    <!-- Tone & Context Banner -->
+    <div class="editorial-card bg-[#EFECE6] p-3.5 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <p class="text-xs sm:text-sm text-zinc-800">
+        研習重點：先區分「對話問答」與「代理執行」的差別，再比較教學現場常見的 4 類工具（GPTs、NotebookLM、Dify/Coze），最後認識可自建技能的開源 <a href="https://hermes-agent.nousresearch.com/" target="_blank" rel="noopener noreferrer" class="underline font-semibold hover:text-[#D94E34]">Hermes Agent</a>。
+      </p>
+      <div class="flex items-center gap-2 shrink-0">
+        <span class="text-xs font-bold text-zinc-600">顯示內容：</span>
+        <button id="toneVernacularBtn" type="button" class="editorial-btn px-2.5 py-1 text-xs font-bold bg-[#D94E34] text-white">白話說明版</button>
+        <button id="toneTechBtn" type="button" class="editorial-btn px-2.5 py-1 text-xs font-bold bg-white text-zinc-800">技術術語版</button>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         INFOGRAPHIC 01: CONVERSATIONAL AI VS AGENT
+         ========================================== -->
+    <section id="sectionSlide1" class="space-y-4">
+      <div class="border-b-2 border-zinc-900 pb-3 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+        <div>
+          <span class="bg-zinc-900 text-white mono-font text-xs px-2 py-0.5 font-bold">PART 01 / 03</span>
+          <h2 class="serif-title text-xl sm:text-2xl font-black text-zinc-900 mt-1">
+            對話式 AI 與 AI Agent 差在哪？
+          </h2>
+        </div>
+        <p id="slide1Subtitle" class="text-xs sm:text-sm text-zinc-600">
+          對話式 AI 負責「產生文字草稿」；AI Agent 則能「呼叫外部工具、連續執行步驟」。
+        </p>
+      </div>
+
+      <!-- Interactive Task Simulator -->
+      <div class="editorial-card p-4 sm:p-5 bg-white space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-200 pb-3">
+          <h3 class="text-sm sm:text-base font-bold text-zinc-900">點選教學情境，對照兩者的處理範圍：</h3>
+          <div class="flex flex-wrap gap-2">
+            <button type="button" data-task="server" class="task-sim-btn editorial-btn px-3 py-1 text-xs font-bold bg-zinc-900 text-white">
+              情境 A：段考出題與格式檢查
+            </button>
+            <button type="button" data-task="report" class="task-sim-btn editorial-btn px-3 py-1 text-xs font-bold bg-white text-zinc-800 hover:bg-zinc-100">
+              情境 B：蒐集教育新聞寄送週報
+            </button>
+            <button type="button" data-task="code" class="task-sim-btn editorial-btn px-3 py-1 text-xs font-bold bg-white text-zinc-800 hover:bg-zinc-100">
+              情境 C：統計作業缺交並發送通知
+            </button>
+          </div>
+        </div>
+
+        <!-- User Prompt Display -->
+        <div class="bg-[#EFECE6] border border-zinc-900 p-3 flex items-center gap-3">
+          <span class="bg-zinc-900 text-white text-xs font-bold px-2 py-0.5 shrink-0">教師指令</span>
+          <p id="simPromptText" class="text-xs sm:text-sm font-bold text-zinc-900"></p>
+        </div>
+
+        <!-- Two-Column Comparison Visual -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          
+          <!-- Left: Conversational AI -->
+          <div class="border-2 border-zinc-800 bg-[#FAF8F5] p-4 flex flex-col justify-between space-y-3">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between border-b border-zinc-300 pb-2">
+                <div>
+                  <span class="editorial-tag bg-zinc-200 text-zinc-800 text-[11px] px-2 py-0.5">對話式 AI (Chatbot)</span>
+                  <h4 id="leftRoleTitle" class="text-base font-extrabold text-zinc-900 mt-1">提供文字草稿（老師手動後續處理）</h4>
+                </div>
+                <span class="mono-font text-[11px] font-bold text-zinc-600 bg-white border border-zinc-400 px-2 py-0.5">一問一答</span>
+              </div>
+
+              <div id="simChatbotReply" class="bg-white border border-zinc-300 p-3 text-xs text-zinc-700 leading-relaxed space-y-1.5"></div>
+            </div>
+
+            <div id="simChatbotPain" class="bg-red-50 border border-[#D94E34] p-2.5 text-xs text-[#9E2F1B]"></div>
+          </div>
+
+          <!-- Right: AI Agent -->
+          <div class="border-2 border-[#1B4D3E] bg-[#F2F7F5] p-4 flex flex-col justify-between space-y-3">
+            <div class="space-y-2.5">
+              <div class="flex items-center justify-between border-b border-[#1B4D3E]/20 pb-2">
+                <div>
+                  <span class="editorial-tag bg-[#1B4D3E] text-white text-[11px] px-2 py-0.5">AI Agent (智慧代理)</span>
+                  <h4 id="rightRoleTitle" class="text-base font-extrabold text-[#1B4D3E] mt-1">拆解任務並呼叫工具完成交付</h4>
+                </div>
+                <button id="replayAgentLoopBtn" type="button" class="text-xs font-bold text-[#D94E34] hover:underline">
+                  ↻ 重播步驟
+                </button>
+              </div>
+
+              <div id="simAgentSteps" class="bg-zinc-900 text-zinc-100 mono-font p-3 text-xs space-y-1.5 border border-zinc-900"></div>
+            </div>
+
+            <div id="simAgentWin" class="bg-[#E6F0EC] border border-[#1B4D3E] p-2.5 text-xs text-[#1B4D3E] font-medium"></div>
+          </div>
+
+        </div>
+
+        <!-- Bottom 4-Dimension Quick Comparison Strip -->
+        <div id="dimComparisonGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2 border-t border-zinc-200"></div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         INFOGRAPHIC 02: 4 TEACHING AI / AGENT TOOLS
+         ========================================== -->
+    <section id="sectionSlide2" class="space-y-4">
+      <div class="border-b-2 border-zinc-900 pb-3 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+        <div>
+          <span class="bg-zinc-900 text-white mono-font text-xs px-2 py-0.5 font-bold">PART 02 / 03</span>
+          <h2 class="serif-title text-xl sm:text-2xl font-black text-zinc-900 mt-1">
+            教學現場常用的 4 類 AI 與 Agent 工具比較
+          </h2>
+        </div>
+        <p class="text-xs sm:text-sm text-zinc-600">
+          點選老師常見的教學需求，篩選適合的工具類型。
+        </p>
+      </div>
+
+      <!-- Interactive Need Filter Bar -->
+      <div class="editorial-card bg-white p-4 sm:p-5 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-zinc-200 pb-3">
+          <span class="text-xs sm:text-sm font-bold text-zinc-900">依教學需求篩選：</span>
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" data-filter="all" class="agent-filter-btn editorial-btn px-2.5 py-1 text-xs font-bold bg-zinc-900 text-white">
+              顯示全部類型
+            </button>
+            <button type="button" data-filter="ide" class="agent-filter-btn editorial-btn px-2.5 py-1 text-xs font-bold bg-white text-zinc-800 hover:bg-zinc-100">
+              快速建立出題／批改對話助教
+            </button>
+            <button type="button" data-filter="saas" class="agent-filter-btn editorial-btn px-2.5 py-1 text-xs font-bold bg-white text-zinc-800 hover:bg-zinc-100">
+              限定根據講義 PDF 問答與導讀
+            </button>
+            <button type="button" data-filter="framework" class="agent-filter-btn editorial-btn px-2.5 py-1 text-xs font-bold bg-white text-zinc-800 hover:bg-zinc-100">
+              拉節點自訂校務／班級工作流
+            </button>
+            <button type="button" data-filter="hermes" class="agent-filter-btn editorial-btn px-2.5 py-1 text-xs font-bold bg-[#D94E34] text-white">
+              通訊軟體交辦、定時排程與自建技能
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Cards + Radar Chart Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+          
+          <!-- Left 7 Cols: 2x2 Category Cards -->
+          <div id="agentCategoryGrid" class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3.5"></div>
+
+          <!-- Right 5 Cols: Capability Chart & Context -->
+          <div class="lg:col-span-5 border-2 border-zinc-900 bg-[#FAF8F5] p-4 space-y-3">
+            <div class="flex items-center justify-between border-b border-zinc-300 pb-1.5">
+              <h4 class="font-extrabold text-xs sm:text-sm text-zinc-900">五項功能維度對照</h4>
+              <span class="mono-font text-[10px] text-zinc-500">功能覆蓋程度示意</span>
+            </div>
+
+            <div class="relative h-56 w-full bg-white border border-zinc-200 p-2">
+              <canvas id="agentRadarChart"></canvas>
+            </div>
+
+            <div id="selectedCategorySummary" class="bg-white border border-zinc-900 p-3 space-y-1">
+              <div class="text-xs font-bold text-[#D94E34]" id="summaryBadge">從教學對話助教到 Hermes Agent</div>
+              <p class="text-xs text-zinc-800 leading-relaxed" id="summaryText">
+                GPTs 與 NotebookLM 適合單次備課與講義問答；Dify 與 Coze 則需手動編排流程節點。<a href="https://nousresearch.com/" target="_blank" rel="noopener noreferrer" class="underline font-semibold">Nous Research</a> 開源的 <a href="https://hermes-agent.nousresearch.com/" target="_blank" rel="noopener noreferrer" class="underline font-semibold">Hermes Agent</a> 則可綁定通訊軟體、設定定時排程，並把做過的教學行政步驟自動存為技能檔。
+              </p>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- ==========================================
+         INFOGRAPHIC 03: HERMES AGENT 4 KEY FEATURES
+         ========================================== -->
+    <section id="sectionSlide3" class="space-y-4">
+      <div class="border-b-2 border-zinc-900 pb-3 flex flex-col sm:flex-row sm:items-end justify-between gap-2">
+        <div>
+          <span class="bg-[#D94E34] text-white mono-font text-xs px-2 py-0.5 font-bold">PART 03 / 03</span>
+          <h2 class="serif-title text-xl sm:text-2xl font-black text-zinc-900 mt-1">
+            Hermes Agent 的四項核心特點
+          </h2>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="https://hermes-agent.nousresearch.com/docs/" target="_blank" rel="noopener noreferrer" class="editorial-btn bg-white px-2.5 py-1 text-xs font-bold text-zinc-900 hover:bg-zinc-100">
+            官方技術文件 ↗
+          </a>
+          <a href="https://openrouter.ai/apps/hermes-agent" target="_blank" rel="noopener noreferrer" class="editorial-btn bg-white px-2.5 py-1 text-xs font-bold text-zinc-900 hover:bg-zinc-100">
+            OpenRouter 模型統計 ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- Interactive Self-Learning Skill Simulator + 4 Pillars -->
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+        
+        <!-- Left 5 Cols: Interactive "Closed Learning Loop" Simulator -->
+        <div class="lg:col-span-5 editorial-card bg-[#1B4D3E] text-white p-4 sm:p-5 flex flex-col justify-between space-y-4">
+          <div class="space-y-2.5">
+            <div class="flex items-center justify-between">
+              <span class="bg-amber-300 text-zinc-900 mono-font text-xs font-extrabold px-2 py-0.5 border border-zinc-900">核心特色：學習迴圈</span>
+              <span class="mono-font text-[11px] text-emerald-200">agentskills.io 格式</span>
+            </div>
+            <h3 class="serif-title text-lg sm:text-xl font-black leading-snug">
+              把教過一次的備課或行政流程，自動存成下次可用的 Skill
+            </h3>
+
+            <!-- Toggle 1st Run vs 2nd Run -->
+            <div class="grid grid-cols-2 gap-2 pt-1">
+              <button id="simRun1Btn" type="button" class="py-1.5 px-2.5 text-xs font-bold border-2 border-white bg-white text-zinc-900 transition-all">
+                第 1 次執行任務<br><span class="font-normal text-[10px]">（調整格式 → 存成 Skill）</span>
+              </button>
+              <button id="simRun2Btn" type="button" class="py-1.5 px-2.5 text-xs font-bold border-2 border-emerald-400/60 bg-[#143B2F] text-emerald-100 hover:bg-[#194739] transition-all">
+                後續執行同類任務<br><span class="font-normal text-[10px]">（直接載入 Skill 執行）</span>
+              </button>
+            </div>
+
+            <!-- Interactive Loop Stage Box -->
+            <div id="hermesLoopDisplay" class="bg-zinc-900 text-zinc-100 border-2 border-zinc-950 p-3.5 space-y-2 mono-font text-xs"></div>
+          </div>
+
+          <!-- CLI One-liner Copy Box -->
+          <div class="bg-[#12352A] border border-emerald-500/40 p-3 space-y-1.5">
+            <div class="flex items-center justify-between text-xs">
+              <span class="font-bold text-emerald-200">單行安裝指令（支援桌面版與終端機）</span>
+              <button id="copyCliBtn" type="button" class="bg-amber-300 hover:bg-amber-200 text-zinc-900 font-bold px-2 py-0.5 text-[11px] border border-zinc-900">
+                複製指令
+              </button>
+            </div>
+            <code id="cliCommandText" class="block mono-font text-[11px] text-amber-200 overflow-x-auto whitespace-nowrap">curl -fsSL https://hermes-agent.nousresearch.com/install.sh | bash</code>
+          </div>
+        </div>
+
+        <!-- Right 7 Cols: 4 Interactive Architecture Pillars -->
+        <div class="lg:col-span-7 flex flex-col justify-between space-y-3.5">
+          
+          <!-- Pillar Selector Tabs -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <button type="button" data-pillar="skills" class="pillar-tab-btn editorial-btn p-2.5 text-left bg-zinc-900 text-white">
+              <div class="text-[11px] mono-font opacity-75">設計 01</div>
+              <div class="font-extrabold text-xs sm:text-sm mt-0.5">自建與更新 Skill</div>
+            </button>
+            <button type="button" data-pillar="gateway" class="pillar-tab-btn editorial-btn p-2.5 text-left bg-white text-zinc-900 hover:bg-zinc-100">
+              <div class="text-[11px] mono-font text-zinc-500">設計 02</div>
+              <div class="font-extrabold text-xs sm:text-sm mt-0.5">多平台通訊網關</div>
+            </button>
+            <button type="button" data-pillar="sandbox" class="pillar-tab-btn editorial-btn p-2.5 text-left bg-white text-zinc-900 hover:bg-zinc-100">
+              <div class="text-[11px] mono-font text-zinc-500">設計 03</div>
+              <div class="font-extrabold text-xs sm:text-sm mt-0.5">7 種執行後端</div>
+            </button>
+            <button type="button" data-pillar="mcp" class="pillar-tab-btn editorial-btn p-2.5 text-left bg-white text-zinc-900 hover:bg-zinc-100">
+              <div class="text-[11px] mono-font text-zinc-500">設計 04</div>
+              <div class="font-extrabold text-xs sm:text-sm mt-0.5">多模型與 MCP</div>
+            </button>
+          </div>
+
+          <!-- Active Pillar Deep-Dive Card -->
+          <div id="pillarDetailCard" class="editorial-card bg-white p-4 sm:p-5 flex-1 flex flex-col justify-between space-y-4"></div>
+
+          <!-- Summary Comparison Footer Table -->
+          <div class="editorial-card bg-[#EFECE6] p-3.5">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-xs">
+              <div class="bg-white border border-zinc-900 p-2.5">
+                <div class="font-extrabold text-zinc-900 mb-0.5">跨學期保留教學脈絡</div>
+                <p class="text-zinc-600">結合長期記憶與 Skill 檔案，保留各班級進度與出題格式偏好。</p>
+              </div>
+              <div class="bg-white border border-zinc-900 p-2.5">
+                <div class="font-extrabold text-zinc-900 mb-0.5">手機通訊軟體隨時交辦</div>
+                <p class="text-zinc-600">從 Telegram、Slack 或 Email 傳訊即可觸發任務與定時排程。</p>
+              </div>
+              <div class="bg-white border border-zinc-900 p-2.5">
+                <div class="font-extrabold text-zinc-900 mb-0.5">校園資料自管與模型彈性</div>
+                <p class="text-zinc-600">MIT 開源可部署於校內主機，自由串接本地模型或雲端 API。</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Bottom Slide Pagination Bar -->
+  <footer class="border-t-2 border-zinc-900 bg-white py-3.5 px-4 sm:px-6 mt-6">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-2.5 text-xs text-zinc-600">
+        <span class="font-bold text-zinc-900">延伸資源：</span>
+        <a href="https://hermes-agent.nousresearch.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-[#D94E34]">Hermes Agent</a>
+        <span>·</span>
+        <a href="https://notebook.google/" target="_blank" rel="noopener noreferrer" class="underline hover:text-[#D94E34]">NotebookLM</a>
+        <span>·</span>
+        <a href="https://dify.ai/" target="_blank" rel="noopener noreferrer" class="underline hover:text-[#D94E34]">Dify</a>
+        <span>·</span>
+        <a href="https://www.coze.com/" target="_blank" rel="noopener noreferrer" class="underline hover:text-[#D94E34]">Coze</a>
+      </div>
+
+      <div id="slidePaginationControls" class="flex items-center gap-2">
+        <button id="prevSlideBtn" type="button" class="editorial-btn bg-[#EFECE6] px-3 py-1 text-xs font-bold text-zinc-900 disabled:opacity-40">← 上一張圖表</button>
+        <span id="slideCounterText" class="mono-font text-xs font-bold px-2">第 1 / 3 張</span>
+        <button id="nextSlideBtn" type="button" class="editorial-btn bg-zinc-900 text-white px-3 py-1 text-xs font-bold disabled:opacity-40">下一張圖表 →</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Toast Notification -->
+  <div id="toastNotice" class="fixed bottom-5 right-5 z-50 hidden editorial-card bg-zinc-900 text-white px-4 py-2 text-xs font-bold">
+    已複製到剪貼簿
+  </div>
+
+  <script>
+    const appState = {
+      viewMode: 'scroll',
+      currentSlide: 1,
+      tone: 'vernacular',
+      currentTask: 'server',
+      currentCategoryFilter: 'all',
+      hermesLoopRun: 1,
+      currentPillar: 'skills'
+    };
+
+    const taskSimulations = {
+      server: {
+        prompt: '「根據這份自然科課綱 PDF，出 5 題素養選擇題，檢查是否超綱並存成題庫檔。」',
+        chatbotReply: `
+          <p class="font-bold text-zinc-900">以下為您擬定的 5 題選擇題草稿：</p>
+          <p>1. 關於光合作用的敘述，下列何者正確？ (A)... (B)...</p>
+          <p class="text-zinc-500">請自行比對課綱細目，並複製貼上至 Word 調整排版。</p>
+        `,
+        chatbotPainVernacular: '限制：僅輸出文字草稿，需由老師人工核對課綱範圍並手動複製排版。',
+        chatbotPainTech: '限制：僅進行單次文本生成，無外部檔案讀寫與自我檢核迴圈。',
+        agentSteps: [
+          { tag: '讀取檔案', cmd: '讀取課綱 PDF 指標與既有題庫格式範本' },
+          { tag: '命題檢核', cmd: '產生 5 題初稿，逐題比對課綱學習表現，修正超綱選項' },
+          { tag: '輸出檔案', cmd: '將通過檢查的題目與解析匯出為標準題庫檔案並傳送給老師' }
+        ],
+        agentWinVernacular: '結果：自動完成課綱比對、修正超綱題目並直接產出排好版的題庫檔案。',
+        agentWinTech: '結果：整合檔案讀取、規則驗證與文件輸出工具完成多步驟迴圈。'
+      },
+      report: {
+        prompt: '「每週五幫我蒐集最新的科展與教育科技新聞，整理重點寄到自然科教學群組。」',
+        chatbotReply: `
+          <p class="font-bold text-zinc-900">請將您想整理的新聞網址或內文貼給我，我可以幫您濃縮成摘要。</p>
+          <p class="text-zinc-500">整理完後，您可以再複製貼到 LINE 或 Email 群組分享。</p>
+        `,
+        chatbotPainVernacular: '限制：無法定時在背景自動執行，每週仍需由老師自己找新聞、貼上與轉發。',
+        chatbotPainTech: '限制：無 Cron 定時排程、網頁瀏覽器自動化與外部通訊網關推播權限。',
+        agentSteps: [
+          { tag: '定時啟動', cmd: '依 Cron 排程於每週五自動啟動瀏覽器工具讀取指定教育網站' },
+          { tag: '篩選摘要', cmd: '比對上週紀錄過濾重複文章，整理本周重點與原文連結' },
+          { tag: '群組推播', cmd: '透過 Email 或 Telegram / Slack 網關直接發送至教學群組' }
+        ],
+        agentWinVernacular: '結果：設定一次後每週自動抓取、去重並發送到群組，不必每週手動操作。',
+        agentWinTech: '結果：結合 Cron 排程、Browser 工具與 Messaging Gateway 自動化執行。'
+      },
+      code: {
+        prompt: '「讀取班級作業繳交表單，找出還沒交的學生名單，整理統計表給我。」',
+        chatbotReply: `
+          <p class="font-bold text-zinc-900">您可以在試算表中使用 VLOOKUP 或 COUNTIF 函數來比對名單：</p>
+          <pre class="bg-zinc-100 p-1.5 border border-zinc-300 text-[11px]">=FILTER(A2:A35, ISNA(MATCH(A2:A35, D2:D30, 0)))</pre>
+          <p class="text-zinc-500">將公式貼入試算表即可看到未繳交名單。</p>
+        `,
+        chatbotPainVernacular: '限制：只給試算表公式建議，老師仍需自己開檔、貼公式與檢查錯誤。',
+        chatbotPainTech: '限制：無沙盒環境執行腳本，無法直接讀寫資料表並輸出結果。',
+        agentSteps: [
+          { tag: '讀取名單', cmd: '在沙盒環境執行 Python 腳本讀取全班名單與繳交紀錄檔' },
+          { tag: '交叉比對', cmd: '比對座號與姓名，自動列出缺交名單與各組繳交率' },
+          { tag: '儲存技能', cmd: '輸出統計表，並將比對腳本存為 homework-check.skill 供下次使用' }
+        ],
+        agentWinVernacular: '結果：直接產出缺交名單與統計表，並把這套檢查流程存成技能供下次重複使用。',
+        agentWinTech: '結果：透過沙盒執行資料處理腳本，並將流程儲存為程序性 Skill。'
+      }
+    };
+
+    const dimensionCardsData = {
+      vernacular: [
+        { title: '1. 運作方式', chat: '一問一答，給出文字建議', agent: '接收目標後自行拆解步驟做到完' },
+        { title: '2. 外部工具', chat: '僅輸出文字，無法直接操作軟體', agent: '可讀寫檔案、查網頁、發送訊息' },
+        { title: '3. 修正能力', chat: '出錯需由老師人工檢查與重問', agent: '遇到錯誤會自行調整做法重試' },
+        { title: '4. 經驗累積', chat: '開新視窗就忘記上次的格式要求', agent: '具備長期記憶，可將流程存成技能' }
+      ],
+      tech: [
+        { title: '1. 執行模式', chat: '單輪或多輪 Request-Response', agent: 'Goal-Driven 規劃與執行迴圈' },
+        { title: '2. 工具權限', chat: '純文本輸出，與外部環境隔離', agent: '支援 Tool Calling、Browser 與 MCP' },
+        { title: '3. 容錯機制', chat: '無執行反饋，依賴人工提示修正', agent: '讀取報錯輸出並自動修正重試' },
+        { title: '4. 記憶架構', chat: '受限於單次 Context Window', agent: '跨對話檢索記憶 + 可複用 Skills' }
+      ]
+    };
+
+    const agentCategories = [
+      {
+        id: 'ide',
+        num: '類型 01',
+        nameVernacular: '自訂對話助教 (GPTs / Gems)',
+        nameTech: '自訂系統提示與知識庫助教',
+        reps: 'ChatGPT GPTs, Gemini Gems, Claude Projects',
+        badgeColor: 'bg-blue-100 text-blue-900 border-blue-900',
+        pros: '免寫程式，輸入規則並上傳範本即可建立「素養出題」或「作文批改」助教',
+        cons: '僅能在網頁視窗內被動問答，無法定時自動執行或跨平台發送通知',
+        bestFor: '日常單次備課、學習單草擬、文章潤飾與批改建議'
+      },
+      {
+        id: 'saas',
+        num: '類型 02',
+        nameVernacular: '教材專屬知識庫 (NotebookLM)',
+        nameTech: '來源接地檢索與摘要工具 (RAG)',
+        reps: 'Google NotebookLM',
+        badgeColor: 'bg-purple-100 text-purple-900 border-purple-900',
+        pros: '嚴格根據老師上傳的講義、課綱 PDF 或影片回答並生成語音導讀，降低幻覺',
+        cons: '專注於資料整理與問答，無法操作外部軟體或執行自動化行政流程',
+        bestFor: '課堂教材問答、文獻整理、課前語音導讀生成'
+      },
+      {
+        id: 'framework',
+        num: '類型 03',
+        nameVernacular: '視覺化工作流平台 (Dify / Coze)',
+        nameTech: '低程式碼節點編排平台 (Workflow)',
+        reps: 'Dify, Coze (扣子)',
+        badgeColor: 'bg-amber-100 text-amber-900 border-amber-900',
+        pros: '透過拖拉節點串接搜尋、表單與知識庫，可發布為班級或校網問答機器人',
+        cons: '流程固定，每次新增或修改步驟都需回到後台手動調整節點連線',
+        bestFor: '資訊教師研習、建置固定流程的校務問答或表單處理機器人'
+      },
+      {
+        id: 'hermes',
+        num: '類型 04',
+        nameVernacular: '自主學習個人代理 (Hermes Agent)',
+        nameTech: '開源具學習迴圈之自主代理',
+        reps: 'Hermes Agent (Nous Research)',
+        badgeColor: 'bg-[#D94E34] text-white border-zinc-900',
+        pros: '支援 20+ 通訊軟體交辦與定時排程，完成任務後會自動將步驟存成 Skill 重複使用',
+        cons: '需透過終端機指令或桌面安裝包完成初始環境與模型設定',
+        bestFor: '需要長期記憶、定時自動化與累積個人教學／行政技能庫的進階應用'
+      }
+    ];
+
+    const hermesPillars = {
+      skills: {
+        tag: '設計 01 · 經驗自動存成技能',
+        titleVernacular: '做過一次的備課或行政流程，自動存成 Skill 檔案重複使用',
+        titleTech: '閉環學習迴圈與程序性記憶 (Closed Learning Loop)',
+        descVernacular: '用一般 AI 工具時，每次開新對話都要重新貼一次學校的教案格式或出題規則。Hermes Agent 完成任務後，會自動把操作步驟整理成標準化的 Skill 檔案（相容 agentskills.io），下次只要講一句話就能直接套用。',
+        descTech: '結合 FTS5 跨對話全文檢索、LLM 摘要與 Honcho 使用者建模，能從執行經驗中自動建立與更新符合 agentskills.io 規範的 Skill 檔案。',
+        highlights: [
+          { label: '自動建立與修正', detail: '完成任務後自動產生 Skill，後續若格式或流程調整也會同步更新' },
+          { label: '教師社群可共享', detail: '採用 agentskills.io 開放格式，老師之間可匯出或匯入寫好的教學技能檔' },
+          { label: '跨對話長期記憶', detail: '記住不同班級的教學進度與個人偏好，不必每次重新交代背景' }
+        ],
+        codePreviewTitle: '自動建立的教學技能檔示意 (~/.hermes/skills/lesson-plan/SKILL.md)',
+        codePreview: `---
+name: school-lesson-plan
+description: 依校內教案表格格式與課綱指標，自動產出單元教案與評量題目
+---
+# 執行步驟：
+1. 讀取指定年級之課綱學習重點與核心素養代碼
+2. 依「引起動機 → 發展活動 → 綜合評量」三段式結構撰寫
+3. 隨附 3 題對應學習目標之形成性評量題並匯出檔案`
+      },
+      gateway: {
+        tag: '設計 02 · 通訊軟體與定時排程',
+        titleVernacular: '直接綁定 Telegram、Slack 或 Email，手機傳訊就能交辦與排程',
+        titleTech: '20+ 平台訊息網關與內建 Cron 排程 (Messaging Gateway)',
+        descVernacular: '老師不需要一直守在電腦前開特定網頁。Hermes 內建通訊網關，可連接 Telegram、Discord、Slack、WhatsApp、Email 等 20 種以上平台，也能直接用自然語言設定「每週一早上八點自動整理班級週報」。',
+        descTech: '單一網關整合 20+ 通訊平台，支援即時語音對話（Voice Mode）、內建 Cron 自然語言排程，以及群組內多角色分工的 Bot Mode。',
+        highlights: [
+          { label: '20+ 通訊軟體整合', detail: '支援 Telegram、Discord、Slack、WhatsApp、Email、Teams、Google Chat 等' },
+          { label: '自然語言定時排程', detail: '直接對話即可設定每周固定執行的資料蒐集、備份或提醒任務' },
+          { label: '群組多助教協作', detail: '透過 Bot Mode 可在群組內設定不同科目的專屬助教透過 @mention 協作' }
+        ],
+        codePreviewTitle: '通訊軟體遠端交辦與定時排程示意',
+        codePreview: `[老師在手機 Telegram 傳訊]
+「幫我把今天上傳的課堂錄音轉成文字重點，另外設定每週五下午 4 點提醒我彙整下週實驗器材清單。」
+
+[Hermes Agent 執行結果]
+- 已完成重點整理並回傳檔案
+- 已建立每週五 16:00 的 Cron 定時排程通知`
+      },
+      sandbox: {
+        tag: '設計 03 · 彈性環境與資料自主',
+        titleVernacular: '可裝在學校電腦或雲端，閒置時自動休眠節省費用',
+        titleTech: '7 種執行後端與無伺服器休眠 (Sandboxing & Backends)',
+        descVernacular: '處理學生名單或校內文件時，若擔心雲端平台隱私問題，可將 Hermes 安裝在校內主機或個人電腦（提供 macOS / Windows 桌面版）。若部署在雲端 Daytona 或 Modal 環境，平時沒任務會自動休眠，有需要時才喚醒計費。',
+        descTech: '支援 Local、Docker、SSH、Daytona、Singularity、Modal、Vercel Sandbox 共 7 種後端，並支援派出隔離子代理（Subagents）平行處理多項任務。',
+        highlights: [
+          { label: '桌面版與 7 種後端', detail: '提供 macOS / Windows 桌面安裝包，以及 Docker、SSH、Modal 等 7 種執行環境' },
+          { label: '閒置自動休眠', detail: '搭配無伺服器後端時，沒有任務即自動休眠，降低長期開啟的雲端開支' },
+          { label: '平行子代理分工', detail: '可同時派出多個獨立子代理分別整理不同年級或單元的教材資料' }
+        ],
+        codePreviewTitle: '執行環境設定示意 (config.yaml)',
+        codePreview: `# 可選擇本地電腦 (local)、Docker 容器或無伺服器休眠環境 (modal)
+terminal_backend: "local"
+
+# 啟用平行子代理（例如同時處理多個班級的題庫整理）
+enable_subagents: true`
+      },
+      mcp: {
+        tag: '設計 04 · 自由換模型與內建工具',
+        titleVernacular: '內建搜尋、生圖、語音等 60+ 工具，且不綁定單一廠商模型',
+        titleTech: '模型中立架構、60+ 原生工具與 MCP 擴充',
+        descVernacular: 'Hermes 採 MIT 開源授權，不會被單一廠商的月費綁死。老師可依任務需求切換 OpenAI、Claude、OpenRouter 上的開源模型或本地模型；同時一裝好就內建網頁搜尋、圖片生成、語音朗讀（TTS）與瀏覽器操作等 60 種以上工具。',
+        descTech: '支援 Nous Portal、OpenRouter、OpenAI 與本地模型端點，內建 60+ 工具（含 Web Search、Vision、TTS、Browser），並原生相容 MCP 外部工具伺服器。',
+        highlights: [
+          { label: '60+ 內建教學實用工具', detail: '直接內建網頁搜尋、教材配圖生成、語音合成（TTS）與網頁自動讀取' },
+          { label: '自由切換各家模型', detail: '可串接 OpenRouter 上超過 200 款模型、商用 API 或校內自架開源模型' },
+          { label: '支援 MCP 擴充協定', detail: '可外掛 Google Drive、Notion、GitHub 等符合 MCP 標準的工具伺服器' }
+        ],
+        codePreviewTitle: '快速設定與 MCP 工具掛載示意',
+        codePreview: `# 一行指令完成模型與 4 大基礎工具（搜尋、生圖、語音、瀏覽器）設定
+hermes setup --portal
+
+# 亦可自由切換為 OpenRouter 或本地端點模型
+model_provider: "openrouter"`
+      }
+    };
+
+    function renderNavigationAndSlides() {
+      const s1 = document.getElementById('sectionSlide1');
+      const s2 = document.getElementById('sectionSlide2');
+      const s3 = document.getElementById('sectionSlide3');
+      const nav1 = document.getElementById('navSlide1');
+      const nav2 = document.getElementById('navSlide2');
+      const nav3 = document.getElementById('navSlide3');
+      const modeIcon = document.getElementById('viewModeIcon');
+      const modeLabel = document.getElementById('viewModeLabel');
+      const pagination = document.getElementById('slidePaginationControls');
+
+      if (appState.viewMode === 'scroll') {
+        s1.classList.remove('hidden');
+        s2.classList.remove('hidden');
+        s3.classList.remove('hidden');
+        modeIcon.textContent = '1/3';
+        modeLabel.textContent = '切換為：單張簡報翻頁模式';
+        pagination.classList.add('hidden');
+      } else {
+        s1.classList.toggle('hidden', appState.currentSlide !== 1);
+        s2.classList.toggle('hidden', appState.currentSlide !== 2);
+        s3.classList.toggle('hidden', appState.currentSlide !== 3);
+        modeIcon.textContent = '01-03';
+        modeLabel.textContent = '切換為：三圖長卷軸總覽';
+        pagination.classList.remove('hidden');
+      }
+
+      [nav1, nav2, nav3].forEach((btn, idx) => {
+        const slideNum = idx + 1;
+        if (appState.currentSlide === slideNum) {
+          btn.className = 'px-3 py-1 text-xs sm:text-sm font-bold transition-colors bg-zinc-900 text-white';
+        } else {
+          btn.className = 'px-3 py-1 text-xs sm:text-sm font-bold transition-colors text-zinc-700 hover:bg-zinc-100';
+        }
+      });
+
+      document.getElementById('slideCounterText').textContent = `第 ${appState.currentSlide} / 3 張`;
+      document.getElementById('prevSlideBtn').disabled = appState.currentSlide === 1;
+      document.getElementById('nextSlideBtn').disabled = appState.currentSlide === 3;
+
+      if (appState.currentSlide === 2 || appState.viewMode === 'scroll') {
+        updateRadarChart();
+      }
+    }
+
+    function renderToneButtons() {
+      const vBtn = document.getElementById('toneVernacularBtn');
+      const tBtn = document.getElementById('toneTechBtn');
+      if (appState.tone === 'vernacular') {
+        vBtn.className = 'editorial-btn px-2.5 py-1 text-xs font-bold bg-[#D94E34] text-white';
+        tBtn.className = 'editorial-btn px-2.5 py-1 text-xs font-bold bg-white text-zinc-800';
+        document.getElementById('leftRoleTitle').textContent = '提供文字草稿（老師手動後續處理）';
+        document.getElementById('rightRoleTitle').textContent = '拆解任務並呼叫工具完成交付';
+      } else {
+        vBtn.className = 'editorial-btn px-2.5 py-1 text-xs font-bold bg-white text-zinc-800';
+        tBtn.className = 'editorial-btn px-2.5 py-1 text-xs font-bold bg-zinc-900 text-white';
+        document.getElementById('leftRoleTitle').textContent = '被動問答式文本模型 (Stateless LLM)';
+        document.getElementById('rightRoleTitle').textContent = '目標驅動自主執行系統 (Autonomous Agent)';
+      }
+    }
+
+    function renderSlide1Simulation() {
+      const sim = taskSimulations[appState.currentTask];
+      document.getElementById('simPromptText').textContent = sim.prompt;
+      document.getElementById('simChatbotReply').innerHTML = sim.chatbotReply;
+      document.getElementById('simChatbotPain').textContent =
+        appState.tone === 'vernacular' ? sim.chatbotPainVernacular : sim.chatbotPainTech;
+
+      const stepsContainer = document.getElementById('simAgentSteps');
+      stepsContainer.innerHTML = sim.agentSteps.map((st, i) => `
+        <div class="step-node flex items-start gap-2 border-l-2 border-emerald-400 pl-2 py-0.5">
+          <span class="bg-emerald-400 text-zinc-950 font-extrabold px-1.5 text-[10px] shrink-0">0${i + 1} · ${st.tag}</span>
+          <span class="text-zinc-200 leading-relaxed">${st.cmd}</span>
+        </div>
+      `).join('');
+
+      document.getElementById('simAgentWin').textContent =
+        appState.tone === 'vernacular' ? sim.agentWinVernacular : sim.agentWinTech;
+
+      document.querySelectorAll('.task-sim-btn').forEach(btn => {
+        if (btn.getAttribute('data-task') === appState.currentTask) {
+          btn.className = 'task-sim-btn editorial-btn px-3 py-1 text-xs font-bold bg-zinc-900 text-white';
+        } else {
+          btn.className = 'task-sim-btn editorial-btn px-3 py-1 text-xs font-bold bg-white text-zinc-800 hover:bg-zinc-100';
+        }
+      });
+
+      const dims = dimensionCardsData[appState.tone];
+      const dimGrid = document.getElementById('dimComparisonGrid');
+      dimGrid.innerHTML = dims.map(d => `
+        <div class="bg-[#FAF8F5] border border-zinc-900 p-2.5 space-y-1">
+          <div class="font-extrabold text-xs text-zinc-900 border-b border-zinc-300 pb-1">${d.title}</div>
+          <div class="text-xs text-zinc-600"><span class="font-bold text-zinc-800">對話 AI：</span>${d.chat}</div>
+          <div class="text-xs text-[#1B4D3E] font-medium"><span class="font-bold">Agent：</span>${d.agent}</div>
+        </div>
+      `).join('');
+    }
+
+    function renderSlide2Categories() {
+      const grid = document.getElementById('agentCategoryGrid');
+      grid.innerHTML = agentCategories.map(cat => {
+        const isHighlighted = appState.currentCategoryFilter === 'all' || appState.currentCategoryFilter === cat.id;
+        const isSelected = appState.currentCategoryFilter === cat.id;
+        const title = appState.tone === 'vernacular' ? cat.nameVernacular : cat.nameTech;
+
+        return `
+          <div data-cat-card="${cat.id}" class="cursor-pointer border-2 transition-all p-3.5 flex flex-col justify-between space-y-2.5 ${
+            isSelected
+              ? 'border-[#D94E34] bg-amber-50/60 shadow-[4px_4px_0px_#D94E34]'
+              : isHighlighted
+              ? 'border-zinc-900 bg-white hover:bg-zinc-50'
+              : 'border-zinc-300 bg-zinc-100/60 opacity-50 hover:opacity-90'
+          }">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between gap-1">
+                <span class="mono-font text-[11px] font-bold px-1.5 py-0.5 border ${cat.badgeColor}">${cat.num}</span>
+                <span class="mono-font text-[10px] font-semibold text-zinc-500">${cat.reps}</span>
+              </div>
+              <h4 class="font-extrabold text-sm sm:text-base text-zinc-900 leading-snug">${title}</h4>
+              <div class="space-y-1 pt-0.5 text-xs">
+                <div class="text-[#1B4D3E]"><span class="font-bold">優點：</span>${cat.pros}</div>
+                <div class="text-[#9E2F1B]"><span class="font-bold">限制：</span>${cat.cons}</div>
+              </div>
+            </div>
+            <div class="pt-1.5 border-t border-zinc-200 text-[11px] text-zinc-600">
+              <span class="font-bold text-zinc-900">常見用途：</span>${cat.bestFor}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('[data-cat-card]').forEach(card => {
+        card.addEventListener('click', () => {
+          const cid = card.getAttribute('data-cat-card');
+          appState.currentCategoryFilter = appState.currentCategoryFilter === cid ? 'all' : cid;
+          renderSlide2Categories();
+          updateFilterButtons();
+          updateRadarChart();
+        });
+      });
+    }
+
+    function updateFilterButtons() {
+      document.querySelectorAll('.agent-filter-btn').forEach(btn => {
+        const f = btn.getAttribute('data-filter');
+        if (f === appState.currentCategoryFilter) {
+          btn.className = 'agent-filter-btn editorial-btn px-2.5 py-1 text-xs font-bold bg-zinc-900 text-white';
+        } else if (f === 'hermes') {
+          btn.className = 'agent-filter-btn editorial-btn px-2.5 py-1 text-xs font-bold bg-[#D94E34] text-white';
+        } else {
+          btn.className = 'agent-filter-btn editorial-btn px-2.5 py-1 text-xs font-bold bg-white text-zinc-800 hover:bg-zinc-100';
+        }
+      });
+    }
+
+    let radarChartInstance = null;
+    function updateRadarChart() {
+      const canvas = document.getElementById('agentRadarChart');
+      if (!canvas) return;
+
+      const datasets = [
+        {
+          id: 'hermes',
+          label: 'Hermes Agent',
+          data: [3, 4, 5, 5, 5],
+          borderColor: '#D94E34',
+          backgroundColor: 'rgba(217, 78, 52, 0.22)',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#D94E34'
+        },
+        {
+          id: 'ide',
+          label: 'GPTs / Gems',
+          data: [5, 3, 2, 1, 1],
+          borderColor: '#234E94',
+          backgroundColor: 'rgba(35, 78, 148, 0.10)',
+          borderWidth: 1.5,
+          pointBackgroundColor: '#234E94'
+        },
+        {
+          id: 'saas',
+          label: 'NotebookLM',
+          data: [5, 5, 1, 1, 1],
+          borderColor: '#71717A',
+          backgroundColor: 'rgba(113, 113, 122, 0.10)',
+          borderWidth: 1.5,
+          pointBackgroundColor: '#71717A'
+        },
+        {
+          id: 'framework',
+          label: 'Dify / Coze',
+          data: [3, 4, 4, 4, 2],
+          borderColor: '#C87D20',
+          backgroundColor: 'rgba(200, 125, 32, 0.10)',
+          borderWidth: 1.5,
+          pointBackgroundColor: '#C87D20'
+        }
+      ];
+
+      const filteredDatasets = datasets.map(ds => {
+        if (appState.currentCategoryFilter === 'all') return ds;
+        if (ds.id === appState.currentCategoryFilter) {
+          return Object.assign({}, ds, { borderWidth: 3.5, backgroundColor: 'rgba(217, 78, 52, 0.28)' });
+        }
+        return Object.assign({}, ds, { borderWidth: 1, backgroundColor: 'rgba(0,0,0,0.02)' });
+      });
+
+      if (radarChartInstance) {
+        radarChartInstance.data.datasets = filteredDatasets;
+        radarChartInstance.update();
+        return;
+      }
+
+      radarChartInstance = new Chart(canvas.getContext('2d'), {
+        type: 'radar',
+        data: {
+          labels: ['免寫程式上手', '指定教材準確度', '跨軟體執行工具', '定時排程與通訊', '經驗自動存成技能'],
+          datasets: filteredDatasets
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: {
+            r: {
+              min: 0,
+              max: 5,
+              ticks: { display: false, stepSize: 1 },
+              pointLabels: {
+                font: { family: "'Noto Sans TC', sans-serif", size: 10, weight: 'bold' },
+                color: '#18181B'
+              },
+              grid: { color: '#D6D3CD' },
+              angleLines: { color: '#D6D3CD' }
+            }
+          },
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 10,
+                font: { family: "'Noto Sans TC', sans-serif", size: 10, weight: 'bold' },
+                color: '#18181B'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderSlide3Hermes() {
+      const r1Btn = document.getElementById('simRun1Btn');
+      const r2Btn = document.getElementById('simRun2Btn');
+      const loopBox = document.getElementById('hermesLoopDisplay');
+
+      if (appState.hermesLoopRun === 1) {
+        r1Btn.className = 'py-1.5 px-2.5 text-xs font-bold border-2 border-white bg-white text-zinc-900 transition-all';
+        r2Btn.className = 'py-1.5 px-2.5 text-xs font-bold border-2 border-emerald-400/60 bg-[#143B2F] text-emerald-100 hover:bg-[#194739] transition-all';
+        loopBox.innerHTML = `
+          <div class="text-amber-300 font-bold">[第 1 次交辦：把題目整理成校內雙欄試卷格式]</div>
+          <div class="space-y-1 text-zinc-300">
+            <div>1. 與老師確認標題字體、配分表與解析擺放位置</div>
+            <div>2. 執行腳本完成試卷排版並確認無誤</div>
+            <div class="bg-emerald-950 border border-emerald-500 p-2 text-emerald-200 mt-1.5">
+              <strong>自動建立 Skill：</strong>將「校內試卷排版規則」存成 <code class="text-amber-300">exam-format.skill</code>。
+            </div>
+          </div>
+        `;
+      } else {
+        r2Btn.className = 'py-1.5 px-2.5 text-xs font-bold border-2 border-white bg-white text-zinc-900 transition-all';
+        r1Btn.className = 'py-1.5 px-2.5 text-xs font-bold border-2 border-emerald-400/60 bg-[#143B2F] text-emerald-100 hover:bg-[#194739] transition-all';
+        loopBox.innerHTML = `
+          <div class="text-emerald-300 font-bold">[下次段考：再幫我出一份第二次段考卷]</div>
+          <div class="space-y-1 text-zinc-300">
+            <div>1. 自動檢索並載入上次存好的 <code class="text-amber-300">exam-format.skill</code></div>
+            <div>2. 不必重新交代排版細節，直接套用同一套標準輸出試卷</div>
+            <div class="bg-zinc-800 border border-amber-400 p-2 text-amber-200 mt-1.5">
+              <strong>持續改進：</strong>若學校這學期修改了考卷抬頭，Hermes 也會自動更新該份 Skill。
+            </div>
+          </div>
+        `;
+      }
+
+      document.querySelectorAll('.pillar-tab-btn').forEach(btn => {
+        const p = btn.getAttribute('data-pillar');
+        if (p === appState.currentPillar) {
+          btn.className = 'pillar-tab-btn editorial-btn p-2.5 text-left bg-[#D94E34] text-white';
+        } else {
+          btn.className = 'pillar-tab-btn editorial-btn p-2.5 text-left bg-white text-zinc-900 hover:bg-zinc-100';
+        }
+      });
+
+      const pData = hermesPillars[appState.currentPillar];
+      const pTitle = appState.tone === 'vernacular' ? pData.titleVernacular : pData.titleTech;
+      const pDesc = appState.tone === 'vernacular' ? pData.descVernacular : pData.descTech;
+
+      document.getElementById('pillarDetailCard').innerHTML = `
+        <div class="space-y-3">
+          <div class="space-y-1">
+            <span class="editorial-tag bg-[#EFECE6] text-zinc-900 text-[11px] px-2 py-0.5 inline-block">${pData.tag}</span>
+            <h3 class="serif-title text-lg sm:text-xl font-black text-zinc-900">${pTitle}</h3>
+            <p class="text-xs text-zinc-700 leading-relaxed">${pDesc}</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+            ${pData.highlights.map(h => `
+              <div class="bg-[#FAF8F5] border border-zinc-900 p-2.5 space-y-0.5">
+                <div class="font-extrabold text-xs text-[#1B4D3E]">${h.label}</div>
+                <p class="text-[11px] text-zinc-600 leading-relaxed">${h.detail}</p>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div class="space-y-1 pt-1">
+          <div class="text-[11px] font-bold text-zinc-500 mono-font">${pData.codePreviewTitle}</div>
+          <pre class="bg-zinc-900 text-emerald-300 mono-font text-[11px] p-3 overflow-x-auto border border-zinc-900 leading-relaxed custom-scrollbar">${pData.codePreview}</pre>
+        </div>
+      `;
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById('toastNotice');
+      toast.textContent = msg;
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2200);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('navSlide1').addEventListener('click', () => {
+        appState.currentSlide = 1;
+        if (appState.viewMode === 'scroll') {
+          document.getElementById('sectionSlide1').scrollIntoView({ behavior: 'smooth' });
+        }
+        renderNavigationAndSlides();
+      });
+      document.getElementById('navSlide2').addEventListener('click', () => {
+        appState.currentSlide = 2;
+        if (appState.viewMode === 'scroll') {
+          document.getElementById('sectionSlide2').scrollIntoView({ behavior: 'smooth' });
+        }
+        renderNavigationAndSlides();
+      });
+      document.getElementById('navSlide3').addEventListener('click', () => {
+        appState.currentSlide = 3;
+        if (appState.viewMode === 'scroll') {
+          document.getElementById('sectionSlide3').scrollIntoView({ behavior: 'smooth' });
+        }
+        renderNavigationAndSlides();
+      });
+
+      document.getElementById('toggleViewModeBtn').addEventListener('click', () => {
+        appState.viewMode = appState.viewMode === 'deck' ? 'scroll' : 'deck';
+        renderNavigationAndSlides();
+      });
+
+      document.getElementById('prevSlideBtn').addEventListener('click', () => {
+        if (appState.currentSlide > 1) {
+          appState.currentSlide--;
+          renderNavigationAndSlides();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+      document.getElementById('nextSlideBtn').addEventListener('click', () => {
+        if (appState.currentSlide < 3) {
+          appState.currentSlide++;
+          renderNavigationAndSlides();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
+
+      window.addEventListener('keydown', (e) => {
+        if (appState.viewMode !== 'deck') return;
+        if (e.key === 'ArrowRight' && appState.currentSlide < 3) {
+          appState.currentSlide++;
+          renderNavigationAndSlides();
+        } else if (e.key === 'ArrowLeft' && appState.currentSlide > 1) {
+          appState.currentSlide--;
+          renderNavigationAndSlides();
+        }
+      });
+
+      document.getElementById('toneVernacularBtn').addEventListener('click', () => {
+        appState.tone = 'vernacular';
+        renderToneButtons();
+        renderSlide1Simulation();
+        renderSlide2Categories();
+        renderSlide3Hermes();
+      });
+      document.getElementById('toneTechBtn').addEventListener('click', () => {
+        appState.tone = 'tech';
+        renderToneButtons();
+        renderSlide1Simulation();
+        renderSlide2Categories();
+        renderSlide3Hermes();
+      });
+
+      document.querySelectorAll('.task-sim-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          appState.currentTask = btn.getAttribute('data-task');
+          renderSlide1Simulation();
+        });
+      });
+
+      document.getElementById('replayAgentLoopBtn').addEventListener('click', () => {
+        const container = document.getElementById('simAgentSteps');
+        container.style.opacity = '0.25';
+        setTimeout(() => {
+          container.style.opacity = '1';
+          showToast('已重新顯示步驟');
+        }, 180);
+      });
+
+      document.querySelectorAll('.agent-filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          appState.currentCategoryFilter = btn.getAttribute('data-filter');
+          updateFilterButtons();
+          renderSlide2Categories();
+          updateRadarChart();
+        });
+      });
+
+      document.getElementById('simRun1Btn').addEventListener('click', () => {
+        appState.hermesLoopRun = 1;
+        renderSlide3Hermes();
+      });
+      document.getElementById('simRun2Btn').addEventListener('click', () => {
+        appState.hermesLoopRun = 2;
+        renderSlide3Hermes();
+      });
+
+      document.querySelectorAll('.pillar-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          appState.currentPillar = btn.getAttribute('data-pillar');
+          renderSlide3Hermes();
+        });
+      });
+
+      document.getElementById('copyCliBtn').addEventListener('click', () => {
+        const cmd = document.getElementById('cliCommandText').textContent;
+        const tempInput = document.createElement('textarea');
+        tempInput.value = cmd;
+        document.body.appendChild(tempInput);
+        tempInput.select();
+        try {
+          document.execCommand('copy');
+          showToast('已複製安裝指令');
+        } catch (err) {
+          showToast('請手動選取複製');
+        }
+        document.body.removeChild(tempInput);
+      });
+
+      appState.viewMode = 'scroll';
+      renderToneButtons();
+      renderSlide1Simulation();
+      renderSlide2Categories();
+      renderSlide3Hermes();
+      renderNavigationAndSlides();
+    });
+  </script>
+</body>
+</html>
